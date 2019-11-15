@@ -1,0 +1,9 @@
+[Unit]
+Description=Restic backup service
+
+[Service]
+Type=oneshot
+ExecStart=/home/ale/.local/bin/backup
+
+[Install]
+WantedBy=default.target

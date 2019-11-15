@@ -1,0 +1,130 @@
+# -*- mode: sh -*-
+# Zsh configuration file - Alessandro Righi
+# Features:
+#   - fancy prompt with syntax highlight, git status and execution time
+#   - sync history from different terminals
+#   - set colors for `less` to color manpages
+#   - completion settings
+
+function add_to_path {
+    export PATH="$1:$PATH"
+}
+
+add_to_path "$HOME/.local/bin/"
+add_to_path "$HOME/.cargo/bin/"
+
+# less settings for nice color output
+export LESS_ADVANCED_PREPROCESSOR=1
+export LESS=-R
+export LESS_TERMCAP_mb=$'\E[1;31m'
+export LESS_TERMCAP_md=$'\E[1;36m'
+export LESS_TERMCAP_me=$'\E[0m'
+export LESS_TERMCAP_se=$'\E[0m'
+export LESS_TERMCAP_so=$'\E[01;44;33m'
+export LESS_TERMCAP_ue=$'\E[0m'
+
+export EDITOR=vim
+export LANG=en_US.UTF-8
+
+# Restic
+export RESTIC_REPOSITORY="sftp:<user>@<host>:<path>"
+export RESTIC_PASSWORD="<password>"
+
+setopt noclobber  	# do not accidentaly truncate existing files with >
+setopt ignoreeof  	# do not terminate on CTRL-D
+setopt correct    	# autocorrect commands
+setopt autocd     	# automaticaly cd typing the name of the directory
+setopt completealiases	# completion for aliases
+setopt noautopushd	# do not automatically pushd
+setopt histignoredups	# ignore history duplicates
+setopt appendhistory	# append to history
+setopt sharehistory     # share history across terminals
+setopt incappendhistory # append history immediately
+setopt extendedglob 	# extended globs
+setopt notify
+
+# shell alias 
+alias ls="ls --color"
+alias ll="ls -lhF"
+alias la="ls -lAhF"
+alias l="ls -lhF"
+alias grep="grep --color=always"
+alias du="du -h"
+alias dig="drill"
+
+# set LS_COLORS to use the same dir colors as ls in completion
+eval $(dircolors)
+
+# completion style config
+autoload -U compinit && compinit
+zstyle ':completion:*' completer _expand _complete _ignored _correct _approximate
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}'
+zstyle ':completion:*' menu select=1
+# zstyle ':completion:*' select-prompt '%SScorrimento abilitato: selezione corrente %p%s'
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,ucomm,comm'
+zstyle ':completion:*:commands' rehash 1
+
+# autoload -U bashcompinit && bashcompinit
+# source $HOME/.bash_completion.d/python-argcomplete.sh
+
+# history config 
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+
+ZSH_THEME_GIT_PROMPT_CACHE=1
+source $HOME/.zsh/zsh-git-prompt/zshrc.sh
+
+NL=$'\n'
+PROMPT="%F{green}%n@%m%F{magenta} :: %F{cyan}%~%f%b \$(git_super_status)$NL %F{yellow}::%f "
+
+bindkey -e
+bindkey "^[[3~"  delete-char
+bindkey "^[3;5~" delete-char
+ttyctl -f
+
+function preexec {
+	_last_command_start_time=$SECONDS
+}
+
+function precmd {	
+	local last_command_return_value=$?
+	local command_status="%F{green} ok "
+	local command_execution_time=0
+	local hours minutes seconds 
+
+	if [[ -n $_last_command_start_time ]] 
+	then
+		command_execution_time=$((SECONDS - _last_command_start_time))
+		if ((last_command_return_value != 0))
+		then
+			command_status="%F{red} fail %F{blue}status %F{yellow}$last_command_return_value "
+		fi
+		unset _last_command_start_time
+	fi
+
+	if ((command_execution_time >= 3600)) 
+	then
+		hours=" $((command_execution_time / 3600))h"
+	fi
+	
+	if ((command_execution_time >= 60))
+	then 
+		minutes=" $((command_execution_time % 3600 / 60))m"
+	fi
+
+	if ((command_execution_time > 1))
+	then
+		seconds=" $((command_execution_time % 60))s"
+	fi
+	
+	RPROMPT="%F{blue}[%F{magenta}$hours$minutes$seconds$command_status%F{blue}]%f"
+
+	# set apple terminal window title
+	print -Pn "\e]2;%n@%M %~\a"
+}
+
+source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# source /usr/bin/virtualenvwrapper.sh 
