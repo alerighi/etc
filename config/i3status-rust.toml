@@ -1,0 +1,52 @@
+theme = "solarized-dark"
+icons = "awesome"
+
+[[block]]
+block = "memory"
+display_type = "memory"
+#format_mem = "{Mup}%"
+#format_swap = "{SUp}%"
+
+[[block]]
+block = "cpu"
+interval = 1
+
+[[block]]
+block = "net"
+device = "wlp3s0"
+signal_strength = true
+speed_up = false
+speed_down = false
+ip = true
+
+[[block]]
+block = "net"
+device = "enp0s25"
+speed_up = false
+speed_down = false
+ip = true
+
+[[block]]
+block = "temperature"
+collapsed = false
+interval = 10
+format = "{average}° (max {max}°)"
+chip = "coretemp-isa-*"
+
+[[block]]
+block = "battery"
+driver = "upower"
+format = "{percentage} {time} {power}"
+
+[[block]]
+block = "sound"
+
+[[block]]
+block = "music"
+on_collapsed_click = "/home/ale/.local/bin/music"
+
+[[block]]
+block = "time"
+interval = 60
+format = "%a %d/%m %R"
+

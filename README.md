@@ -9,3 +9,4 @@ A series of scripts that I wrote:
 
 Also a couple of configuration files:
 - my `.zshrc`
+- my i3 configuration files
