@@ -1,5 +1,8 @@
-;; don't write stupid ~ files
-(setq make-backup-files nil)
+;; set backup directory
+(setq backup-directory-alist '((".*" . "~/.emacs.d/backup")))
+
+;; set autosave directory
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save/" t)))
 
 ;; don't show the startup message
 (setq inhibit-startup-message t)
@@ -12,10 +15,17 @@
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
 
+;; set dark theme
+(load-theme 'dracula t)
+
+(require 'use-package)
+
 ;; LSP configuration
-(require 'lsp-mode)
-(add-hook 'c++-mode-hook #'lsp-deferred)
-(add-hook 'c-mode-hook #'lsp-deferred)
-(add-hook 'python-mode-hook #'lsp-deferred)
-(add-hook 'rust-mode-hook #'lsp-deferred)
+(use-package lsp-mode
+  :hook (c++-mode . lsp)
+  :hook (c-mode . lsp)
+  :hook (python-mode . lsp)
+  :hook (rust-mode . lsp)
+  :commands lsp)
+
 
