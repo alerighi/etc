@@ -1,0 +1,23 @@
+# Load X resources
+xrdb .Xresources
+
+# Load X keyboard mod configuration
+xmodmap ~/.Xmodmap
+
+# Start X screensaver daemon
+xscreensaver -no-splash &
+
+# Start screen locking daemon
+xss-lock --transfer-sleep-lock -- xscreensaver-command -lock &
+
+# Start compositor
+picom -b --unredir-if-possible --backend xr_glx_hybrid --vsync --use-damage --glx-no-stencil &
+
+# Start pulseaudio
+start-pulseaudio-x11 
+
+# Set desktop wallpaper
+# feh --bg-scale /usr/share/backgrounds/archlinux/archlinux-simplyblack.png
+
+# Start i3
+exec i3
