@@ -163,7 +163,7 @@ check_shell() {
 			info2 "Setting login shell to zsh"
 			ZSH_PATH=$(command -v zsh)
 
-			if ! [ -f ${ZSH_PATH} ]; then
+			if ! [ -f "${ZSH_PATH}" ]; then
 				warn "Zsh binary not found!"
 			else
 				info2 "Zsh is ${ZSH_PATH}"
@@ -194,7 +194,7 @@ install_config() {
 main() {
 	info2 "Running main script"
 
-	install_software vim wget curl zsh
+	install_package vim wget curl zsh
 
 	info "Installing config files"
 	install_config "zshrc" ".zshrc"
