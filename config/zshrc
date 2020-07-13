@@ -1,17 +1,54 @@
-# ZSH configuration file 
+#!/hint/zsh
+# ZSH configuration file
+# Alessandro Righi (alerighi.it)
+
+# Dependencies (install with `brew`):
+# - coreutils
+# - zsh-completions
+# - zsh-syntax-highlighting
+# - zsh-git-prompt (currently need some patches in gitstatus.py)
+
+# History of changes
+# 2020-03-30:
+#  - do not include in PATH GNU coreutils, but use aliases (to avoid problem when building software)
+#  - cleanup unused PATHs
+#  - refactor and simplify rprompt code
+#  - comment code
+# 2020-04-21
+#  - use git status from repo https://github.com/starcraftman/zsh-git-prompt
+#  - disabled git prompt cache (but should rewrite gitstatus in Rust to make it faster)
+# 2020-06-07
+#  - download plugins on first launch
+# 2020-06-30
+#  - add Android SDK configuration
+# 2020-07-06
+#  - add support for iTerm2
+#  - put GNU binaries in path
 
 # Add a path to $PATH
-function add_to_path {
-	export PATH="$1:$PATH"
+add2path() {
+	export PATH="$1:${PATH}"
 }
 
 # Add paths
-add_to_path "$HOME/.local/bin/"
-add_to_path "$HOME/.cargo/bin/"
+add2path "${HOME}/.cargo/bin"
+add2path "${HOME}/.local/bin"
+
+# GNU binaries for macOS
+if [ "$(uname)" = "Darwin" ]; then
+	add2path "/usr/local/Cellar/coreutils/8.32/libexec/gnubin/"
+fi 
+
+# Android SDK
+export ANDROID_HOME="${HOME}/Library/Android/sdk"
+add2path "${ANDROID_HOME}/emulator"
+add2path "${ANDROID_HOME}/tools"
+add2path "${ANDROID_HOME}/tools/bin"
+add2path "${ANDROID_HOME}/platform-tools"
 
 # Less settings for nice color output
 export LESS_ADVANCED_PREPROCESSOR=1
-export LESS=-R
+export LESS="-R"
 export LESS_TERMCAP_mb=$'\E[1;31m'
 export LESS_TERMCAP_md=$'\E[1;36m'
 export LESS_TERMCAP_me=$'\E[0m'
@@ -19,53 +56,54 @@ export LESS_TERMCAP_se=$'\E[0m'
 export LESS_TERMCAP_so=$'\E[01;44;33m'
 export LESS_TERMCAP_ue=$'\E[0m'
 
-# Setup editor and language
-export EDITOR=vim
-export LANG=en_US.UTF-8
+# Setup editor (of course, vim)
+export EDITOR="vim"
 
-# Restic backup repository settings
-export RESTIC_REPOSITORY=sftp:ale@alerighi.duckdns.org:/storage/backups
-export RESTIC_PASSWORD=ale96
+# Set locale to english (don't want error messages in italian...)
+export LANG="en_US.UTF-8"
 
 # Setup a bunch of options
 setopt noclobber  	# do not accidentaly truncate existing files with >
-setopt ignoreeof  	# do not terminate on CTRL-D
+setopt ignoreeof  	# do not close the shell with EOF (CTRL-D)
 setopt correct    	# autocorrect commands
-setopt autocd     	# automaticaly cd typing the name of the directory
-setopt completealiases	# completion for aliases
+setopt autocd     	# automaticaly cd by typing the name of the directory
+setopt completealiases	# autocompletion for aliases
 setopt noautopushd	# do not automatically pushd
+setopt pushdignoredups  # ignore pushd duplicated
 setopt histignoredups	# ignore history duplicates
 setopt appendhistory	# append to history
-setopt sharehistory     # share history across terminals
 setopt incappendhistory # append history immediately
 setopt extendedglob 	# extended globs
 setopt notify
 
-# Aliases 
+# MacOS specific aliases
+if [ "$(uname)" = "Darwin" ]; then
+	alias lsusb="system_profiler SPUSBDataType"
+fi
+
+# Aliases
 alias ls="ls --color"
 alias ll="ls -lhF"
 alias la="ls -lAhF"
+alias l="ls -lhF"
 alias grep="grep --color=always"
-alias du="du -h"	# human readable is better
-alias dig="drill" 	# old dig command is deprecated 
-alias open="xdg-open"	# I'm used to a Mac... 
+alias du="du -h"
+alias dd="dd status=progress"
 
-# Enable the command run-help to get documentation for builtins
-unalias run-help
-autoload run-help
-alias help="run-help"   # compatibility with bash help
+# Set completion path to include /usr/local
+fpath=("/usr/local/share/zsh-completions" "/usr/local/etc/bash_completion.d" ${fpath})
 
-# Enable completion 
-autoload -Uz compinit && compinit
+# Enable completion
+autoload -Uz +X compinit && compinit
 
 # Compatibility with bash autocomplete
-# autoload -U bashcompinit && bashcompinit
+autoload -Uz +X bashcompinit && bashcompinit
 
 # Use LS_COLORS for completion
 eval $(dircolors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
-# Use menu for completion 
+# Use menu for completion
 zstyle ':completion:*' menu select
 
 # Completion for kill command
@@ -75,65 +113,97 @@ zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,ucomm,comm'
 # Rehash on completion, useful to get completions when you install new software
 zstyle ':completion:*:commands' rehash 1
 
+# Case insensitive match
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+
 # History settings
-HISTFILE=~/.zsh_history
-HISTSIZE=10000
-SAVEHIST=10000
-
-# Setup git prompt 
-ZSH_THEME_GIT_PROMPT_CACHE=1 # use cache to improve performance
-source $HOME/.zsh/zsh-git-prompt/zshrc.sh
-
-# Setup prompt 
-NL=$'\n'
-PROMPT="%F{green}%n@%m%F{magenta} :: %F{cyan}%~%f%b \$(git_super_status)$NL %F{yellow}::%f "
+HISTFILE="${HOME}/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
 
 # Bind keys in emacs mode
 bindkey -e
 
-# To make delete key working. I use emacs CTRL-D anyway
-# bindkey "^[[3~"  delete-char
-# bindkey "^[3;5~" delete-char
+# Make DEL keyboard key actuall delete
+bindkey "^[[3~"  delete-char
+bindkey "^[3;5~" delete-char
 
-# Avoid that programs modify the terminal state
+# Froze the tty, avoid that other programs change settings
 ttyctl -f
 
+# Setup plugins
+PLUGINS_DIR="${HOME}/.local/share/zsh/plugins"
+
+# Download plugins on first launch
+if ! test -d "${PLUGINS_DIR}"; then
+	git clone "https://github.com/zsh-users/zsh-syntax-highlighting.git" "${PLUGINS_DIR}/zsh-syntax-highlighting"
+	git clone "https://github.com/starcraftman/zsh-git-prompt.git" "${PLUGINS_DIR}/zsh-git-prompt"
+fi
+
+# Setup git prompt
+# ZSH_THEME_GIT_PROMPT_CACHE=1 # use cache to improve performance
+source "${PLUGINS_DIR}/zsh-git-prompt/zshrc.sh"
+
+# Syntax highlight
+source "${PLUGINS_DIR}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
+# Setup prompt and right prompt
+PROMPT=$'%F{%(!.red.green)}%n%F{cyan}@%F{blue}%m %F{cyan}%~%f $(git_super_status)\n %F{blue}%(!.#.$)%f '
+RPROMPT='%F{blue}[ %F{magenta}${__rprompt_hours}${__rprompt_minutes}${__rprompt_seconds}${__rprompt_command_status}%F{blue} ]%f'
+
 # Function that gets executed before a command is executed
-function preexec {
-	_last_command_start_time=$SECONDS
+preexec() {
+	__last_command_start_time=${SECONDS}
 }
 
 # Function that gets executed before the prompt is displayed
-function precmd {	
-	local return_value=$? hours minutes seconds execution_time command_status="%F{green} ok "
+precmd() {
+	local return_value=$?
 
-	if [[ -n $_last_command_start_time ]]; then
-		execution_time=$((SECONDS - _last_command_start_time))
-		unset _last_command_start_time
-		
+	__rprompt_command_status="%F{green}ok"
+	__rprompt_hours=
+	__rprompt_minutes=
+	__rprompt_seconds=
+
+	if test -n "${__last_command_start_time}"; then
+		local execution_time=$((SECONDS - __last_command_start_time))
+		unset __last_command_start_time
+
 		if ((return_value != 0)); then
-			command_status="%F{red} fail %F{blue}status %F{yellow}$return_value "
+			__rprompt_command_status="%F{red}fail %F{blue}status %F{yellow}${return_value}"
 		fi
 
 		if ((execution_time >= 3600)); then
-			hours=" $((execution_time / 3600))h"
+			__rprompt_hours="$((execution_time / 3600))h "
 		fi
-	
-		if ((execution_time >= 60)); then 
-			minutes=" $((execution_time % 3600 / 60))m"
+
+		if ((execution_time >= 60)); then
+			__rprompt_minutes="$((execution_time % 3600 / 60))m "
 		fi
 
 		if ((execution_time > 1)); then
-			seconds=" $((execution_time % 60))s"
-		fi	
-	fi	
-	
-	# Set right prompt
-	RPROMPT="%F{blue}[%F{magenta}$hours$minutes$seconds$command_status%F{blue}]%f"
+			__rprompt_seconds="$((execution_time % 60))s "
+		fi
+	fi
 
-	# Set apple terminal window title
-	print -Pn "\e]2;%n@%M %~\a"
+	# Set apple terminal user@host window title
+	print -Pn "\e]2;%n@%M\a"
 }
 
-# Syntax highlight
-source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# Make a directory and cd into it
+mcd() {
+	if ((# != 1)); then
+		echo "Usage: mcd <directory>"
+		return 1
+	fi
+
+	if ! test -e "$1"; then
+		mkdir "$1" || return 1
+	fi
+
+	cd "$1"
+}
+
+
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+

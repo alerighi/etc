@@ -1,0 +1,9 @@
+set nocompatible 
+syntax enable
+filetype plugin on
+set backspace=indent,eol,start
+set hls
+set laststatus=2 
+set path+=**
+set wildmenu 
+set mouse=a
