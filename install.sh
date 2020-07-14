@@ -8,6 +8,7 @@ REPO_DIRECTORY="${GIT_DIRECTORY}/$(basename "${REPO}")"
 VERSION="1.0.0"
 INSTALL_SCRIPT="install.sh"
 CONFIG_DIR="${REPO_DIRECTORY}/config"
+SSH_KEYS_URL="https://alerighi.it/sshkey"
 
 debug() {
     echo "[D] $@"
@@ -191,6 +192,19 @@ install_config() {
 	fi
 }
 
+install_ssh_keys() {
+	info "Adding user SSH keys"
+
+	mkdir -p "${HOME}/.ssh"
+	if ! [ -f "${HOME}/.ssh/authorized_keys" ]; then
+		info2 "Downloading SSH keys from ${SSH_KEYS_URL}"
+		curl "${SSH_KEYS_URL}" > "${HOME}/.ssh/authorized_keys"
+		info2 "Done downloading SSH keys."
+	else
+		info2 "SSH keys already present. Not overwritting file."
+	fi
+}
+
 main() {
 	info2 "Running main script"
 
@@ -200,6 +214,7 @@ main() {
 	install_config "zshrc" ".zshrc"
 	install_config "vimrc" ".vimrc"
 
+	install_ssh_keys
 	check_shell
 }
 
