@@ -1,0 +1,27 @@
+#!/bin/sh
+
+set -xe
+
+# MacOS cache
+rm -rf ~/Library/Caches/*
+rm -rf ~/cache/*
+sudo rm -rf /Library/Caches/*
+
+# NPM
+npm cache clean --force
+
+# HomeBrew
+brew cleanup
+rm -rf /Users/ale/Library/Caches/Homebrew
+
+# Rust
+rm -rf ~/.cargo/git
+rm -rf ~/.cargo/registry
+
+# Ruby
+rm -rf ~/.bundle
+
+# Expo
+rm -rf ~/.expo/cache
+
+
