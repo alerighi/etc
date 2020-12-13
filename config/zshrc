@@ -41,10 +41,13 @@ fi
 
 # Android SDK
 export ANDROID_HOME="${HOME}/Library/Android/sdk"
-add2path "${ANDROID_HOME}/emulator"
-add2path "${ANDROID_HOME}/tools"
-add2path "${ANDROID_HOME}/tools/bin"
-add2path "${ANDROID_HOME}/platform-tools"
+
+if [ -d "${ANDROID_HOME}" ]; then
+	add2path "${ANDROID_HOME}/emulator"
+	add2path "${ANDROID_HOME}/tools"
+	add2path "${ANDROID_HOME}/tools/bin"
+	add2path "${ANDROID_HOME}/platform-tools"
+fi
 
 # Less settings for nice color output
 export LESS_ADVANCED_PREPROCESSOR=1
@@ -132,16 +135,15 @@ bindkey "^[3;5~" delete-char
 ttyctl -f
 
 # Setup plugins
-PLUGINS_DIR="${HOME}/.local/share/zsh/plugins"
+PLUGINS_DIR="${HOME}/.zsh"
 
 # Download plugins on first launch
 if ! test -d "${PLUGINS_DIR}"; then
 	git clone "https://github.com/zsh-users/zsh-syntax-highlighting.git" "${PLUGINS_DIR}/zsh-syntax-highlighting"
-	git clone "https://github.com/starcraftman/zsh-git-prompt.git" "${PLUGINS_DIR}/zsh-git-prompt"
+	git clone "https://github.com/alerighi/zsh-git-prompt.git" "${PLUGINS_DIR}/zsh-git-prompt"
 fi
 
 # Setup git prompt
-# ZSH_THEME_GIT_PROMPT_CACHE=1 # use cache to improve performance
 source "${PLUGINS_DIR}/zsh-git-prompt/zshrc.sh"
 
 # Syntax highlight
