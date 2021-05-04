@@ -1,9 +1,11 @@
 set nocompatible 
 syntax enable
 filetype plugin on
+filetype plugin indent on
 set backspace=indent,eol,start
 set hls
 set laststatus=2 
 set path+=**
 set wildmenu 
 set mouse=a
+

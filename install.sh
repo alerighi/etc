@@ -8,3 +8,4 @@ done
 
 install -m 600 config/zshrc "${HOME}/.zshrc"
 install -m 600 config/vimrc "${HOME}/.vimrc"
+install -m 600 config/bashrc "${HOME}/.bashrc"

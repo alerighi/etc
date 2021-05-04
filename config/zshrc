@@ -4,9 +4,6 @@
 
 # Dependencies (install with `brew`):
 # - coreutils
-# - zsh-completions
-# - zsh-syntax-highlighting
-# - zsh-git-prompt (currently need some patches in gitstatus.py)
 
 # History of changes
 # 2020-03-30:
@@ -24,6 +21,9 @@
 # 2020-07-06
 #  - add support for iTerm2
 #  - put GNU binaries in path
+# 2021-01-10
+#  - change how plugins are loaded
+#  - load forked zsh-git-prompt plugin
 
 # Add a path to $PATH
 add2path() {
@@ -41,13 +41,10 @@ fi
 
 # Android SDK
 export ANDROID_HOME="${HOME}/Library/Android/sdk"
-
-if [ -d "${ANDROID_HOME}" ]; then
-	add2path "${ANDROID_HOME}/emulator"
-	add2path "${ANDROID_HOME}/tools"
-	add2path "${ANDROID_HOME}/tools/bin"
-	add2path "${ANDROID_HOME}/platform-tools"
-fi
+add2path "${ANDROID_HOME}/emulator"
+add2path "${ANDROID_HOME}/tools"
+add2path "${ANDROID_HOME}/tools/bin"
+add2path "${ANDROID_HOME}/platform-tools"
 
 # Less settings for nice color output
 export LESS_ADVANCED_PREPROCESSOR=1
@@ -137,17 +134,19 @@ ttyctl -f
 # Setup plugins
 PLUGINS_DIR="${HOME}/.zsh"
 
-# Download plugins on first launch
-if ! test -d "${PLUGINS_DIR}"; then
-	git clone "https://github.com/zsh-users/zsh-syntax-highlighting.git" "${PLUGINS_DIR}/zsh-syntax-highlighting"
-	git clone "https://github.com/alerighi/zsh-git-prompt.git" "${PLUGINS_DIR}/zsh-git-prompt"
-fi
+install_plugin() {
+	local plugin_path="${PLUGINS_DIR}/$1"
+	local plugin_dir="$(dirname "${plugin_path}")"
 
-# Setup git prompt
-source "${PLUGINS_DIR}/zsh-git-prompt/zshrc.sh"
+	if ! test -d "${plugin_dir}"; then
+		git clone "$2" "${plugin_dir}"
+	fi
 
-# Syntax highlight
-source "${PLUGINS_DIR}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+	source "${plugin_path}"
+}
+
+install_plugin "zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" "https://github.com/zsh-users/zsh-syntax-highlighting.git" 
+install_plugin "zsh-git-prompt/zshrc.sh" "https://github.com/alerighi/zsh-git-prompt.git"
 
 # Setup prompt and right prompt
 PROMPT=$'%F{%(!.red.green)}%n%F{cyan}@%F{blue}%m %F{cyan}%~%f $(git_super_status)\n %F{blue}%(!.#.$)%f '
@@ -206,6 +205,27 @@ mcd() {
 	cd "$1"
 }
 
+# Run a C program as a script
+run() {
+	if ((# < 1)); then
+		echo "Usage: run program.c othersource.c"
+	fi
+
+	local exe=$(mktemp)
+
+	gcc -o "${exe}" "$@" && "${exe}"
+
+	rm -f "${exe}"
+}
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+test -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" && source "${HOME}/.nix-profile/etc/profile.d/nix.sh" # added by Nix installer
 
+eval $(gpg-agent --daemon)
+GPG_TTY=$(tty)
+export GPG_TTY
+if [ -f "${HOME}/.gpg-agent-info" ]; then
+    . "${HOME}/.gpg-agent-info"
+    export GPG_AGENT_INFO
+    export SSH_AUTH_SOCK
+fi
