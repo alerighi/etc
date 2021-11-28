@@ -2,10 +2,10 @@
 
 set -xe
 
-for f in bin/*; do
-	install -m 700 "$f" "${HOME}/.local/bin"
+for f in $PWD/bin/*; do
+	ln -sf --backup "$f" "${HOME}/.local/bin"
 done
 
-install -m 600 config/zshrc "${HOME}/.zshrc"
-install -m 600 config/vimrc "${HOME}/.vimrc"
-install -m 600 config/bashrc "${HOME}/.bashrc"
+ln -sf --backup "${PWD}/config/zshrc" "${HOME}/.zshrc"
+ln -sf --backup "${PWD}/config/vimrc" "${HOME}/.vimrc"
+ln -sf --backup "${PWD}/config/bashrc" "${HOME}/.bashrc"
