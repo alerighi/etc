@@ -2,8 +2,9 @@
 # ZSH configuration file
 # Author: Alessandro Righi <alessandro.righi@alerighi.it>
 
-# Dependencies (install with `brew`):
-# - coreutils
+# Dependencies:
+# - coreutils (if you use macOS)
+# - git (to download plugins)
 
 # History of changes
 # 2020-03-30:
@@ -26,12 +27,44 @@
 #  - load forked zsh-git-prompt plugin
 # 2021-10-21
 #  - change git status implementation
-#  - remove funzions specific for macOS
+# 2022-05-04
+#  - support for macOS
+
+# Checks if running on macOS
+is_mac() {
+	test "$(uname)" = "Darwin"
+}
+
+##
+# Environment section
+##
 
 # Add a path to $PATH
 add2path() {
-	export PATH="$1:${PATH}"
+	# only if file is a directory and it's not already in PATH
+	if [ -d "$1" ] && ! echo "${PATH}" | sed 's/:/\n/g' | grep -x "$1" >/dev/null; then
+		export PATH="$1:${PATH}"
+	fi
 }
+
+# Add paths
+add2path "${HOME}/.cargo/bin"
+add2path "${HOME}/.local/bin"
+
+# GNU binaries for macOS
+add2path "/usr/local/opt/coreutils/libexec/gnubin/"
+
+# Android SDK
+if is_mac; then
+	export ANDROID_HOME="${HOME}/Library/Android/sdk"
+else
+	export ANDROID_HOME="${HOME}/.android/sdk"
+fi
+
+add2path "${ANDROID_HOME}/emulator"
+add2path "${ANDROID_HOME}/tools"
+add2path "${ANDROID_HOME}/tools/bin"
+add2path "${ANDROID_HOME}/platform-tools"
 
 # Less settings for nice color output
 export LESS_ADVANCED_PREPROCESSOR=1
@@ -49,7 +82,23 @@ export EDITOR="vim"
 # Set locale to english (don't want error messages in italian...)
 export LANG="en_US.UTF-8"
 
-# Setup a bunch of options
+# Aliases
+alias ls="ls --color"
+alias ll="ls -lhF"
+alias la="ls -lAhF"
+alias l="ls -lhF"
+alias grep="grep --color=always"
+alias du="du -h"
+alias dd="dd status=progress"
+
+if is_mac; then
+	alias lsusb="system_profiler SPUSBDataType"
+fi
+
+##
+# Shell configuration
+##
+
 setopt noclobber  	# do not accidentaly truncate existing files with >
 setopt ignoreeof  	# do not close the shell with EOF (CTRL-D)
 setopt correct    	# autocorrect commands
@@ -63,14 +112,8 @@ setopt incappendhistory # append history immediately
 setopt extendedglob 	# extended globs
 setopt notify
 
-# Aliases
-alias ls="ls --color"
-alias ll="ls -lhF"
-alias la="ls -lAhF"
-alias l="ls -lhF"
-alias grep="grep --color=always"
-alias du="du -h"
-alias dd="dd status=progress"
+# Set completion path to include /usr/local
+fpath=("/usr/local/share/zsh-completions" "/usr/local/etc/bash_completion.d" ${fpath})
 
 # Enable completion
 autoload -Uz +X compinit && compinit
@@ -143,12 +186,14 @@ if (( ${+terminfo[smkx]} && ${+terminfo[rmkx]} )); then
 	function zle_application_mode_stop { echoti rmkx }
 	add-zle-hook-widget -Uz zle-line-init zle_application_mode_start
 	add-zle-hook-widget -Uz zle-line-finish zle_application_mode_stop
-fi 
+fi
 
 # Froze the tty, avoid that other programs change settings
 ttyctl -f
 
-# Setup plugins
+##
+# Add plugins and integrations
+##
 PLUGINS_DIR="${HOME}/.zsh"
 
 install_plugin() {
@@ -160,7 +205,7 @@ install_plugin() {
 	fi
 }
 
-install_plugin "zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" "https://github.com/zsh-users/zsh-syntax-highlighting.git" 
+install_plugin "zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" "https://github.com/zsh-users/zsh-syntax-highlighting.git"
 install_plugin "gitstatus/gitstatus.plugin.zsh" "https://github.com/romkatv/gitstatus"
 
 source "${PLUGINS_DIR}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
@@ -168,7 +213,21 @@ source "${PLUGINS_DIR}/gitstatus/gitstatus.prompt.zsh"
 
 unset PLUGINS_DIR
 
-# Setup prompt and right prompt
+# iTerm2 integration
+if [ -e "${HOME}/.iterm2_shell_integration.zsh" ]; then
+	source "${HOME}/.iterm2_shell_integration.zsh"
+fi
+
+# NVM (Node Version Manager)
+export NVM_DIR="${HOME}/.nvm"
+if [ -d "${NVM_DIR}" ]; then
+	source "${NVM_DIR}/nvm.sh"
+	source "${NVM_DIR}/bash_completion"
+fi
+
+##
+# Prompt related functions
+##
 PROMPT=$'%F{%(!.red.green)}%n%F{cyan}@%F{blue}%m %F{cyan}%$((-GITSTATUS_PROMPT_LEN-1))<…<%~%<<%f${GITSTATUS_PROMPT:+ $GITSTATUS_PROMPT}\n %F{blue}%(!.#.$)%f '
 RPROMPT='%F{blue}[ %F{magenta}${__rprompt_hours}${__rprompt_minutes}${__rprompt_seconds}${__rprompt_command_status}%F{blue} ]%f'
 
@@ -211,6 +270,10 @@ precmd() {
 	print -Pn "\e]2;%n@%M\a"
 }
 
+##
+# Custom functions
+##
+
 # Make a directory and cd into it
 mcd() {
 	if ((# != 1)); then
@@ -247,6 +310,7 @@ ghclone() {
 	local repo=$1
 	local destination="${HOME}/git/${repo}"
 	local remote="git@github.com:${repo}.git"
-	
+
 	git clone "${remote}" "${destination}" && cd "${destination}"
 }
+

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Bash configuration file 
+# Bash configuration file
 # Alessandro Righi <alessandro.righi@alerighi.it>
 # History:
 #  - 2021-05-03 first version
@@ -37,4 +37,3 @@ alias ll='ls -lhF'
 alias la='ls -alhF'
 alias grep='grep --color=always'
 alias ..='cd ..'
-
