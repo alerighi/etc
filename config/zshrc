@@ -48,6 +48,7 @@ add2path() {
 }
 
 # Add paths
+add2path "${HOME}/.local/bin"
 add2path "${HOME}/.cargo/bin"
 add2path "${HOME}/.local/bin"
 
@@ -81,6 +82,7 @@ export EDITOR="vim"
 
 # Set locale to english (don't want error messages in italian...)
 export LANG="en_US.UTF-8"
+export LANGUAGE="en"
 
 # Aliases
 alias ls="ls --color"
@@ -90,6 +92,7 @@ alias l="ls -lhF"
 alias grep="grep --color=always"
 alias du="du -h"
 alias dd="dd status=progress"
+alias ip="ip --color=auto"
 
 if is_mac; then
 	alias lsusb="system_profiler SPUSBDataType"
@@ -312,5 +315,9 @@ ghclone() {
 	local remote="git@github.com:${repo}.git"
 
 	git clone "${remote}" "${destination}" && cd "${destination}"
+}
+
+reloadconf() {
+	source "${HOME}/.zshrc"
 }
 
