@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+
+import sys
+import requests
+
+from dataclasses import dataclass
+
+@dataclass
+class Device:
+    ip: str
+    channel: int
+
+
+DEVICES = {
+    "bagno": Device("192.168.1.41", 0),
+    "camera": Device("192.168.1.42", 0),
+    "armadio": Device("192.168.1.42", 1),
+    "ufficio": Device("192.168.1.43", 0),
+    "scale": Device("192.168.1.43", 1),
+}
+
+COMMANDS = ("on", "off", "toggle")
+
+
+def exec_cmd(device: str, cmd: str):
+    device = DEVICES[device]
+    uri = f"http://{device.ip}/relay/{device.channel}?turn={cmd}"
+    requests.get(uri)
+
+
+def parse_args():
+    commands = []
+    devices = [[]]
+
+    for arg in sys.argv[1:]:
+        if arg in COMMANDS:
+            commands.append(arg)
+            devices.append([])
+        elif arg in DEVICES.keys():
+            devices[-1].append(arg)
+        else:
+            sys.exit("invalid arguments")
+
+    if not commands or not devices:
+        sys.exit("invalid arguments")
+
+    if not devices[0]:
+        devices.pop(0)
+
+    if not devices[-1]:
+        devices.pop(-1)
+
+    if len(devices) != len(commands):
+        sys.exit("invalid arguments")
+
+    result = []
+    for cmd, dev in zip(commands, devices):
+        result.append(dict(cmd=cmd, devices=dev))
+
+    return result
+
+
+def main():
+    args = parse_args()
+    for group in args:
+        for device in group["devices"]:
+            exec_cmd(device, group["cmd"])
+
+
+if __name__ == '__main__':
+    main()
