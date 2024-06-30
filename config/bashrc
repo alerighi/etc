@@ -19,6 +19,7 @@ export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:
 # set environment variables
 export EDITOR=vim
 export LANG="en_US.UTF-8"
+export LANGUAGE="en"
 export PS1="\[\e[32m\]\u\[\e[m\]\[\e[32m\]@\[\e[m\]\[\e[32m\]\h\[\e[m\] \[\e[34m\]\w\[\e[m\] \\$ "
 
 # colors for less

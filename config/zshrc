@@ -64,13 +64,13 @@ add2path() {
 }
 
 # Add paths
-add2path /opt/homebrew/opt/python/libexec/bin/
-add2path "${HOME}/.cargo/bin"
-add2path "${HOME}/.local/bin"
-# add2path "${HOME}/Library/Python/3.11/bin"
+if is_mac; then
+	add2path "/opt/homebrew/opt/python/libexec/bin/"
+	add2path "/opt/homebrew/opt/binutils/bin"
+fi
 
-# GNU binaries for macOS
-add2path "/usr/local/opt/coreutils/libexec/gnubin/"
+add2path "${HOME}/.local/bin"
+add2path "${HOME}/.cargo/bin"
 
 # Android SDK
 if is_mac; then
@@ -105,6 +105,7 @@ export EDITOR="vim"
 
 # Set locale to english (don't want error messages in italian...)
 export LANG="en_US.UTF-8"
+export LANGUAGE="en"
 
 # Aliases
 alias ls="ls --color"
@@ -114,6 +115,7 @@ alias l="ls -lhF"
 alias grep="grep --color=always"
 alias du="du -h"
 alias dd="dd status=progress"
+alias ip="ip --color=auto"
 
 if is_mac; then
 	alias lsusb="system_profiler SPUSBDataType"
@@ -330,6 +332,7 @@ ghclone() {
 	git clone "${remote}" "${destination}" && cd "${destination}"
 }
 
+# Tool to create a virtual environment easily, or enter it if already exists
 venv() {
 	local python_exe="python3"
 	if [ $# -gt 1 ]; then
@@ -364,6 +367,7 @@ venv() {
 	echo "To exit the venv use \"deactivate\" command"
 }
 
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+reloadconf() {
+	source "${HOME}/.zshrc"
+}
 
-export PATH="$PATH:/opt/homebrew/opt/binutils/bin"
