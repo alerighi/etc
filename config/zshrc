@@ -2,34 +2,6 @@
 # ZSH configuration file
 # Author: Alessandro Righi <alessandro.righi@alerighi.it>
 
-# Dependencies:
-# - coreutils (if you use macOS)
-# - git (to download plugins)
-
-# History of changes
-# 2020-03-30:
-#  - do not include in PATH GNU coreutils, but use aliases (to avoid problem when building software)
-#  - cleanup unused PATHs
-#  - refactor and simplify rprompt code
-#  - comment code
-# 2020-04-21
-#  - use git status from repo https://github.com/starcraftman/zsh-git-prompt
-#  - disabled git prompt cache (but should rewrite gitstatus in Rust to make it faster)
-# 2020-06-07
-#  - download plugins on first launch
-# 2020-06-30
-#  - add Android SDK configuration
-# 2020-07-06
-#  - add support for iTerm2
-#  - put GNU binaries in path
-# 2021-01-10
-#  - change how plugins are loaded
-#  - load forked zsh-git-prompt plugin
-# 2021-10-21
-#  - change git status implementation
-# 2022-05-04
-#  - support for macOS
-
 # Checks if running on macOS
 is_mac() {
 	test "$(uname)" = "Darwin"
@@ -93,6 +65,11 @@ alias grep="grep --color=always"
 alias du="du -h"
 alias dd="dd status=progress"
 alias ip="ip --color=auto"
+
+if type nvim >/dev/null; then
+	alias vim="nvim"
+	export EDITOR="nvim"
+fi
 
 if is_mac; then
 	alias lsusb="system_profiler SPUSBDataType"
