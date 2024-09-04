@@ -196,7 +196,7 @@ ttyctl -f
 ##
 # Add plugins and integrations
 ##
-PLUGINS_DIR="${HOME}/.zsh"
+PLUGINS_DIR="${HOME}/.local/share/zsh"
 
 install_plugin() {
 	local plugin_path="${PLUGINS_DIR}/$1"
@@ -210,6 +210,7 @@ install_plugin() {
 install_plugin "zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" "https://github.com/zsh-users/zsh-syntax-highlighting.git"
 install_plugin "gitstatus/gitstatus.plugin.zsh" "https://github.com/romkatv/gitstatus"
 
+# WARN: plugins must be sourced not in a function, othwerise there can be errors!
 source "${PLUGINS_DIR}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 source "${PLUGINS_DIR}/gitstatus/gitstatus.prompt.zsh"
 
