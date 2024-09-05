@@ -10,5 +10,5 @@ done
 ln -sf --backup "${PWD}/config/zshrc" "${HOME}/.zshrc"
 ln -sf --backup "${PWD}/config/vimrc" "${HOME}/.vimrc"
 ln -sf --backup "${PWD}/config/bashrc" "${HOME}/.bashrc"
-ln -sf --backup "${PWD}/config/nvim" "${HOME}/.config/nvim"
+ln -sf --backup "${PWD}/config/nvim/" "${HOME}/.config/"
 

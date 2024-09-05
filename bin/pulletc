@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd "${HOME}/git/alerighi/etc"
+
+git pull
+
