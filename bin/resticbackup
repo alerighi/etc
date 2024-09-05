@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+
+source "${HOME}/.config/restic/environment"
+
+restic backup --verbose --exclude-file="${HOME}/.config/restic/excludes.txt" backup ~/ 
+
