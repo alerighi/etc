@@ -3,4 +3,4 @@
 cd "${HOME}/git/alerighi/etc"
 
 git pull
-
+./install.sh
