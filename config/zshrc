@@ -99,7 +99,6 @@ fi
 ##
 
 setopt noclobber  	# do not accidentaly truncate existing files with >
-setopt ignoreeof  	# do not close the shell with EOF (CTRL-D)
 setopt correct    	# autocorrect commands
 setopt autocd     	# automaticaly cd by typing the name of the directory
 setopt completealiases	# autocompletion for aliases
