@@ -12,3 +12,6 @@ ln -sf --backup "${PWD}/config/vimrc" "${HOME}/.vimrc"
 ln -sf --backup "${PWD}/config/bashrc" "${HOME}/.bashrc"
 ln -sf --backup "${PWD}/config/nvim/" "${HOME}/.config/"
 
+mkdir -p "${HOME}/.config/restic"
+ln -sf --backup "${PWD}/config/restic/excludes.txt" "${HOME}/.config/restic/"
+
