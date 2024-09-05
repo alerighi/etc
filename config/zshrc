@@ -215,6 +215,11 @@ source "${PLUGINS_DIR}/gitstatus/gitstatus.prompt.zsh"
 
 unset PLUGINS_DIR
 
+# Virtualenvwrapper
+if type virtualenvwrapper.sh >/dev/null; then
+	source virtualenvwrapper_lazy.sh
+fi
+
 # iTerm2 integration
 if [ -e "${HOME}/.iterm2_shell_integration.zsh" ]; then
 	source "${HOME}/.iterm2_shell_integration.zsh"
