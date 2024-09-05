@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+cd "${HOME}/git/alerighi/etc"
+
+git add -A
+git commit
+git push
+
